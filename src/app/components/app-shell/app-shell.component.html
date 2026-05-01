@@ -1,0 +1,199 @@
+<div class="app-root">
+  <header class="top-strip">
+    <div class="brand-block">
+      <p class="eyebrow">Cinematic local notebook</p>
+      <h1>Noetic Cotinga</h1>
+      <p class="subtitle">
+        @if (vault.activeProfile(); as profile) {
+          {{ profile.name }} · {{ profile.encryptionState === 'enabled' ? 'vault lock available' : 'vault open' }}
+        } @else {
+          No profile selected
+        }
+      </p>
+    </div>
+
+    <div class="strip-actions">
+      <button
+        type="button"
+        class="hero-action"
+        [disabled]="!vault.canEditActiveProfile()"
+        (click)="createNoteQuick()"
+      >
+        New note
+      </button>
+
+      <div class="actions-dropdown" [class.open]="vault.actionMenuOpen()">
+        <button
+          #actionsTrigger
+          type="button"
+          class="actions-trigger"
+          aria-haspopup="menu"
+          [attr.aria-expanded]="vault.actionMenuOpen()"
+          (click)="toggleActionMenu($event)"
+        >
+          Workspace
+        </button>
+
+        @if (vault.actionMenuOpen()) {
+          <section
+            #actionsMenu
+            class="actions-menu"
+            role="menu"
+            aria-label="Workspace actions"
+            (click)="$event.stopPropagation()"
+            (keydown)="onActionsMenuKeydown($event)"
+          >
+            <button
+              type="button"
+              class="menu-group"
+              [class.active]="vault.activeUtilitySection() === 'profiles'"
+              (click)="toggleUtilitySection($event, 'profiles')"
+            >
+              Profiles
+            </button>
+
+            @if (vault.activeUtilitySection() === 'profiles') {
+              <div class="submenu" role="group" aria-label="Profile actions">
+                <button type="button" role="menuitem" (click)="runWorkspaceAction('switch-profile')">Switch profile</button>
+                <button type="button" role="menuitem" (click)="runWorkspaceAction('create-profile')">Create profile</button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  [disabled]="!vault.activeProfile()"
+                  (click)="runWorkspaceAction('rename-profile')"
+                >
+                  Rename active profile
+                </button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  [disabled]="vault.profiles().length < 2 || !vault.activeProfile()"
+                  (click)="runWorkspaceAction('delete-profile')"
+                >
+                  Delete active profile
+                </button>
+                @if (vault.activeProfile()?.encryptionState === 'none') {
+                  <button
+                    type="button"
+                    role="menuitem"
+                    [disabled]="!vault.canEditActiveProfile()"
+                    (click)="runWorkspaceAction('enable-lock')"
+                  >
+                    Enable profile lock
+                  </button>
+                }
+                @if (vault.activeProfile()?.encryptionState === 'enabled' && !vault.isActiveProfileLocked()) {
+                  <button type="button" role="menuitem" (click)="runWorkspaceAction('lock-now')">Lock profile now</button>
+                }
+              </div>
+            }
+
+            <button
+              type="button"
+              class="menu-group"
+              [class.active]="vault.activeUtilitySection() === 'collections'"
+              (click)="toggleUtilitySection($event, 'collections')"
+            >
+              Collections
+            </button>
+
+            @if (vault.activeUtilitySection() === 'collections') {
+              <div class="submenu" role="group" aria-label="Collection actions">
+                <button
+                  type="button"
+                  role="menuitem"
+                  [disabled]="!vault.canEditActiveProfile()"
+                  (click)="runWorkspaceAction('create-collection')"
+                >
+                  Create collection
+                </button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  [disabled]="!vault.selectedCollectionId() || !vault.canEditActiveProfile()"
+                  (click)="runWorkspaceAction('rename-collection')"
+                >
+                  Rename selected collection
+                </button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  [disabled]="!vault.selectedCollectionId() || !vault.canEditActiveProfile()"
+                  (click)="runWorkspaceAction('delete-collection')"
+                >
+                  Delete selected collection
+                </button>
+              </div>
+            }
+
+            <button
+              type="button"
+              class="menu-group"
+              [class.active]="vault.activeUtilitySection() === 'transfer'"
+              (click)="toggleUtilitySection($event, 'transfer')"
+            >
+              Transfer
+            </button>
+
+            @if (vault.activeUtilitySection() === 'transfer') {
+              <div class="submenu" role="group" aria-label="Import and export actions">
+                <button type="button" role="menuitem" (click)="runWorkspaceAction('import')">Import JSON</button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  [disabled]="!vault.selectedNote()"
+                  (click)="runWorkspaceAction('export-note')"
+                >
+                  Export selected note
+                </button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  [disabled]="!vault.selectedCollectionId()"
+                  (click)="runWorkspaceAction('export-collection')"
+                >
+                  Export selected collection
+                </button>
+                <button type="button" role="menuitem" (click)="runWorkspaceAction('export-profile')">Export active profile</button>
+                <button type="button" role="menuitem" (click)="runWorkspaceAction('export-all')">Export all profiles</button>
+              </div>
+            }
+          </section>
+        }
+      </div>
+    </div>
+  </header>
+
+  @if (vault.error(); as error) {
+    <section class="error-banner" role="status">
+      <p>{{ error }}</p>
+      <button type="button" (click)="vault.clearError()">Dismiss</button>
+    </section>
+  }
+
+  <main class="workspace">
+    <section class="pane rail-pane desktop-rail">
+      <app-note-list mode="full" />
+    </section>
+
+    <section class="pane rail-pane mobile-rail" [class.mobile-visible]="vault.activeMobilePane() !== 'editor'">
+      @if (vault.activeMobilePane() === 'collections') {
+        <app-note-list mode="collections-only" />
+      } @else {
+        <app-note-list mode="notes-only" />
+      }
+    </section>
+
+    <section class="pane stage-pane" [class.mobile-visible]="vault.activeMobilePane() === 'editor'">
+      <app-note-editor />
+    </section>
+  </main>
+
+  <app-mobile-nav />
+
+  <app-management-modal />
+  <app-conflict-modal />
+  <app-lock-screen />
+
+  <input #importFileInput type="file" accept="application/json,.json" (change)="onImportFileChange($event)" hidden />
+</div>

@@ -1,0 +1,18 @@
+@if (vault.isActiveProfileLocked() && vault.activeProfile(); as profile) {
+  <section class="backdrop" role="dialog" aria-modal="true" aria-label="Locked profile">
+    <div class="card">
+      <h2>{{ profile.name }} is locked</h2>
+      <p>Enter your passphrase to decrypt this profile in memory.</p>
+
+      <input
+        type="password"
+        [(ngModel)]="passphrase"
+        placeholder="Passphrase"
+        (keyup.enter)="unlock()"
+        [disabled]="vault.isBusy()"
+      />
+
+      <button type="button" (click)="unlock()" [disabled]="vault.isBusy()">Unlock profile</button>
+    </div>
+  </section>
+}

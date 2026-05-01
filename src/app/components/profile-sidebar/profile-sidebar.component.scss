@@ -1,0 +1,158 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  padding: 1rem;
+  min-width: 0;
+  height: 100%;
+  overflow: auto;
+}
+
+.section {
+  background: var(--glass-soft);
+  border: 1px solid var(--line-soft);
+  border-radius: 1.2rem;
+  padding: 1rem;
+  backdrop-filter: blur(14px);
+  box-shadow: var(--elevation-1);
+}
+
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.85rem;
+
+  h2 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 620;
+    font-size: 1.36rem;
+    letter-spacing: 0.015em;
+    color: var(--ink-1);
+  }
+}
+
+.ghost,
+.inline-actions button,
+.collection-tools button {
+  border: 1px solid var(--line-soft);
+  background: var(--glass-strong);
+  color: var(--ink-2);
+  border-radius: 0.95rem;
+  padding: 0.4rem 0.74rem;
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: transform 170ms ease, background 170ms ease, border-color 170ms ease;
+}
+
+button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: var(--gold-muted);
+  border-color: var(--line-strong);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.profile-list,
+.collection-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.profile-chip {
+  width: 100%;
+  text-align: left;
+  border: 1px solid transparent;
+  border-radius: 1.06rem;
+  background: var(--glass-strong);
+  color: var(--ink-1);
+  padding: 0.72rem 0.82rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: border-color 180ms ease, background 180ms ease;
+}
+
+.profile-chip.active {
+  border-color: var(--line-strong);
+  background: color-mix(in oklab, var(--gold-muted) 52%, var(--glass-strong));
+}
+
+.lock {
+  font-size: 0.64rem;
+  letter-spacing: 0.12em;
+  color: var(--ink-3);
+  font-weight: 650;
+}
+
+.inline-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.72rem;
+  flex-wrap: wrap;
+}
+
+.collection-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.38rem;
+}
+
+.collection-item {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid transparent;
+  border-radius: 1rem;
+  padding: 0.66rem 0.74rem;
+  background: var(--glass-strong);
+  cursor: pointer;
+  color: var(--ink-1);
+  font: inherit;
+  font-size: 0.9rem;
+}
+
+.collection-item.active {
+  border-color: var(--line-strong);
+  background: color-mix(in oklab, var(--gold-muted) 54%, var(--glass-strong));
+}
+
+.collection-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.lacquer-tab {
+  --collection-color: #cda26e;
+  width: 0.95rem;
+  height: 0.6rem;
+  border-radius: 0.32rem;
+  background:
+    linear-gradient(145deg, color-mix(in oklab, var(--collection-color) 80%, white), var(--collection-color));
+  border: 1px solid color-mix(in oklab, var(--collection-color) 70%, #3b2818);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.count {
+  font-size: 0.78rem;
+  color: var(--ink-3);
+}
+
+.collection-tools {
+  display: flex;
+  gap: 0.32rem;
+  align-items: center;
+}
+
+.danger {
+  color: color-mix(in oklab, #8e2f3a 70%, var(--ink-1));
+}

@@ -1,0 +1,46 @@
+<div class="editor-shell" [class.disabled]="disabled">
+  <div class="toolbar" role="toolbar" aria-label="Editor commands">
+    <div class="toolbar-group">
+      <button type="button" [class.active]="isActive('bold')" (click)="toggleBold()">Bold</button>
+      <button type="button" [class.active]="isActive('italic')" (click)="toggleItalic()">Italic</button>
+      <button type="button" [class.active]="isActive('underline')" (click)="toggleUnderline()">Underline</button>
+    </div>
+
+    <span class="divider"></span>
+
+    <div class="toolbar-group">
+      <button type="button" [class.active]="isActive('heading', { level: 1 })" (click)="setHeading(1)">Title</button>
+      <button type="button" [class.active]="isActive('heading', { level: 2 })" (click)="setHeading(2)">Section</button>
+      <button type="button" [class.active]="isActive('heading', { level: 3 })" (click)="setHeading(3)">Subhead</button>
+      <button type="button" [class.active]="isActive('paragraph')" (click)="setParagraph()">Body</button>
+    </div>
+
+    <span class="divider"></span>
+
+    <div class="toolbar-group">
+      <button type="button" [class.active]="isActive('bulletList')" (click)="toggleBulletList()">Bullet</button>
+      <button type="button" [class.active]="isActive('orderedList')" (click)="toggleOrderedList()">Numbered</button>
+      <button type="button" [class.active]="isActive('blockquote')" (click)="toggleBlockquote()">Quote</button>
+      <button type="button" [class.active]="isActive('codeBlock')" (click)="toggleCodeBlock()">Code</button>
+    </div>
+
+    <span class="divider"></span>
+
+    <div class="toolbar-group palette" aria-label="Color palette">
+      @for (color of palette; track color) {
+        <button
+          type="button"
+          class="color"
+          [style.background]="color"
+          [class.selected]="color === selectedColor"
+          (click)="applyColor(color)"
+          [attr.aria-label]="'Set color ' + color"
+        ></button>
+      }
+    </div>
+
+    <button type="button" class="clear" (click)="clearFormatting()">Clear</button>
+  </div>
+
+  <div #editorHost class="editor"></div>
+</div>

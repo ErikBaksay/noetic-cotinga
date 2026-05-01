@@ -1,0 +1,33 @@
+<section class="panel">
+  @if (!vault.selectedNote()) {
+    <div class="empty-state">
+      <p class="eyebrow">Writing stage</p>
+      <h2>Open a note to begin writing</h2>
+      <p>Pick a note from the rail or create one from the top strip.</p>
+      <button type="button" (click)="vault.createNote()" [disabled]="!vault.canEditActiveProfile()">Create note</button>
+    </div>
+  }
+
+  @if (vault.selectedNote(); as note) {
+    <header class="editor-head">
+      <div class="title-stack">
+        <p class="eyebrow">Writing stage</p>
+        <input
+          type="text"
+          [ngModel]="note.title"
+          (ngModelChange)="onTitleChange(note.id, $event)"
+          [disabled]="!vault.canEditActiveProfile()"
+        />
+        <p class="meta">Last edited {{ note.updatedAt | date: 'medium' }}</p>
+      </div>
+
+      <button type="button" class="export" (click)="exportSelectedNote()">Export note JSON</button>
+    </header>
+
+    <app-rich-text-editor
+      [content]="note.tiptapDoc"
+      [disabled]="!vault.canEditActiveProfile()"
+      (contentChange)="onContentChange(note.id, $event)"
+    />
+  }
+</section>

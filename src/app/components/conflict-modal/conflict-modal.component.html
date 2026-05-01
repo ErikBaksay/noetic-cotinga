@@ -1,0 +1,52 @@
+@if (vault.showConflictModal() && vault.pendingImport(); as pending) {
+  <section class="backdrop" role="dialog" aria-modal="true" aria-label="Import conflicts">
+    <div class="modal">
+      <header>
+        <h2>Resolve import conflicts</h2>
+        <p>
+          {{ pending.conflicts.length }} conflict{{ pending.conflicts.length === 1 ? '' : 's' }} detected. Suggested choices
+          default to the newest version.
+        </p>
+      </header>
+
+      <div class="conflict-list">
+        @for (conflict of pending.conflicts; track conflict.entityType + ':' + conflict.entityId) {
+          <article class="conflict">
+            <div class="conflict-head">
+              <h3>{{ conflict.displayName || conflict.entityId }}</h3>
+              <span>{{ conflict.entityType }}</span>
+            </div>
+
+            <label>
+              Resolution
+              <select
+                [ngModel]="resolutionFor(conflict)"
+                (ngModelChange)="setResolution(conflict, $event)"
+              >
+                <option value="keep_local">Keep local</option>
+                <option value="keep_imported">Use imported</option>
+                <option value="duplicate">Import as duplicate</option>
+              </select>
+            </label>
+
+            <div class="versions">
+              <div>
+                <h4>Local</h4>
+                <p>{{ describeVersion(conflict.versions.local) }}</p>
+              </div>
+              <div>
+                <h4>Imported</h4>
+                <p>{{ describeVersion(conflict.versions.imported) }}</p>
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+
+      <footer>
+        <button type="button" class="ghost" (click)="vault.cancelPendingImportResolutions()">Cancel</button>
+        <button type="button" (click)="apply()">Apply merge</button>
+      </footer>
+    </div>
+  </section>
+}

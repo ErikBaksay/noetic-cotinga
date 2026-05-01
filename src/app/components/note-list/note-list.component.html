@@ -1,0 +1,179 @@
+<section class="rail" [class.collections-only]="mode === 'collections-only'" [class.notes-only]="mode === 'notes-only'">
+  <header class="rail-head">
+    <div>
+      <p class="eyebrow">Navigator</p>
+      <h2>Notes</h2>
+      <p class="profile-context">
+        @if (vault.activeProfile(); as profile) {
+          {{ profile.name }}
+        } @else {
+          No profile
+        }
+      </p>
+    </div>
+
+    <button type="button" class="hero-note" (click)="createNote()" [disabled]="!vault.canEditActiveProfile()">New note</button>
+  </header>
+
+  @if (mode !== 'collections-only') {
+    <div class="controls">
+      <input
+        type="search"
+        [ngModel]="vault.searchQuery()"
+        (ngModelChange)="vault.setSearchQuery($event)"
+        placeholder="Search notes"
+      />
+
+      <label>
+        <input
+          type="checkbox"
+          [ngModel]="vault.includeArchived()"
+          (ngModelChange)="vault.setIncludeArchived($event)"
+        />
+        Include archived
+      </label>
+    </div>
+  }
+
+  <div class="group-stack" [class.collection-mode]="mode === 'collections-only'">
+    @if (showCollections()) {
+      <article class="collection-group" [class.open]="isOpen(null)" [class.selected]="vault.selectedCollectionId() === null">
+        <button
+          type="button"
+          class="group-toggle"
+          [attr.aria-expanded]="isOpen(null)"
+          [attr.aria-label]="collectionLabel(null, 'All notes')"
+          (click)="openCollectionGroup(null)"
+        >
+          <span class="group-main">
+            <span class="oxide-marker all"></span>
+            <span class="group-title">All notes</span>
+          </span>
+          <span class="count">{{ notesFor(null).length }}</span>
+        </button>
+
+        @if (isOpen(null) && showNotes()) {
+          <div class="filmstrip">
+            @if (notesFor(null).length === 0) {
+              <p class="empty">No notes yet. Create one to begin.</p>
+            }
+
+            @for (note of notesFor(null); track note.id) {
+              <article class="note-row" [class.active]="note.id === vault.selectedNoteId()">
+                <button type="button" class="note-main" (click)="vault.selectNote(note.id)">
+                  <span class="title">{{ note.title }}</span>
+                  <span class="meta">Edited {{ note.updatedAt | date: 'MMM d, y · HH:mm' }}</span>
+                </button>
+
+                @if (note.id === vault.selectedNoteId()) {
+                  <div class="row-actions">
+                    <button type="button" (click)="togglePin(note.id)">{{ note.pinned ? 'Unpin' : 'Pin' }}</button>
+                    <button type="button" (click)="toggleArchive(note.id)">
+                      {{ note.archived ? 'Restore' : 'Archive' }}
+                    </button>
+                    <button type="button" class="danger" (click)="deleteNote(note.id)">Delete</button>
+                  </div>
+                }
+              </article>
+            }
+          </div>
+        }
+      </article>
+
+      @for (collection of vault.collections(); track collection.id) {
+        <article
+          class="collection-group"
+          [class.open]="isOpen(collection.id)"
+          [class.selected]="collection.id === vault.selectedCollectionId()"
+        >
+          <button
+            type="button"
+            class="group-toggle"
+            [attr.aria-expanded]="isOpen(collection.id)"
+            [attr.aria-label]="collectionLabel(collection.id, collection.name)"
+            (click)="openCollectionGroup(collection.id)"
+          >
+            <span class="group-main">
+              <span class="oxide-marker" [style.--collection-color]="collection.color"></span>
+              <span class="group-title">{{ collection.name }}</span>
+            </span>
+            <span class="count">{{ collectionCount(collection) }}</span>
+          </button>
+
+          @if (isOpen(collection.id) && showNotes()) {
+            <div class="group-tools">
+              <button type="button" (click)="openRenameCollectionModal(collection.id)" [disabled]="!vault.canEditActiveProfile()">
+                Rename
+              </button>
+              <button
+                type="button"
+                class="danger"
+                (click)="openDeleteCollectionModal(collection.id)"
+                [disabled]="!vault.canEditActiveProfile()"
+              >
+                Delete collection
+              </button>
+            </div>
+
+            <div class="filmstrip">
+              @if (notesFor(collection.id).length === 0) {
+                <p class="empty">No notes in this collection.</p>
+              }
+
+              @for (note of notesFor(collection.id); track note.id) {
+                <article class="note-row" [class.active]="note.id === vault.selectedNoteId()">
+                  <button type="button" class="note-main" (click)="vault.selectNote(note.id)">
+                    <span class="title">{{ note.title }}</span>
+                    <span class="meta">Edited {{ note.updatedAt | date: 'MMM d, y · HH:mm' }}</span>
+                  </button>
+
+                  @if (note.id === vault.selectedNoteId()) {
+                    <div class="row-actions">
+                      <button type="button" (click)="togglePin(note.id)">{{ note.pinned ? 'Unpin' : 'Pin' }}</button>
+                      <button type="button" (click)="toggleArchive(note.id)">
+                        {{ note.archived ? 'Restore' : 'Archive' }}
+                      </button>
+                      <button type="button" class="danger" (click)="deleteNote(note.id)">Delete</button>
+                    </div>
+                  }
+                </article>
+              }
+            </div>
+          }
+        </article>
+      }
+    }
+
+    @if (showNotes() && !showCollections()) {
+      <section class="notes-only-strip">
+        <header>
+          <h3>{{ vault.currentCollectionName() }}</h3>
+          <span>{{ vault.filteredNotes().length }} visible</span>
+        </header>
+
+        @if (vault.filteredNotes().length === 0) {
+          <p class="empty">No notes for this collection and filter.</p>
+        }
+
+        <div class="filmstrip">
+          @for (note of vault.filteredNotes(); track note.id) {
+            <article class="note-row" [class.active]="note.id === vault.selectedNoteId()">
+              <button type="button" class="note-main" (click)="vault.selectNote(note.id)">
+                <span class="title">{{ note.title }}</span>
+                <span class="meta">Edited {{ note.updatedAt | date: 'MMM d, y · HH:mm' }}</span>
+              </button>
+
+              @if (note.id === vault.selectedNoteId()) {
+                <div class="row-actions">
+                  <button type="button" (click)="togglePin(note.id)">{{ note.pinned ? 'Unpin' : 'Pin' }}</button>
+                  <button type="button" (click)="toggleArchive(note.id)">{{ note.archived ? 'Restore' : 'Archive' }}</button>
+                  <button type="button" class="danger" (click)="deleteNote(note.id)">Delete</button>
+                </div>
+              }
+            </article>
+          }
+        </div>
+      </section>
+    }
+  </div>
+</section>

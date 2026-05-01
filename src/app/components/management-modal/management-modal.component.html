@@ -1,0 +1,78 @@
+@if (vault.utilityModal(); as modal) {
+  <section
+    class="backdrop"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-label]="heading(modal)"
+    (click)="onBackdropClick($event)"
+  >
+    <div class="modal" (click)="$event.stopPropagation()">
+      <header class="modal-head">
+        <div>
+          <p class="kicker">Noetic Cotinga</p>
+          <h2>{{ heading(modal) }}</h2>
+          <p>{{ description(modal) }}</p>
+        </div>
+
+        <button type="button" class="close" (click)="cancel()" aria-label="Close modal">Close</button>
+      </header>
+
+      @if (modal.kind === 'switch_profile') {
+        <div class="profile-picker">
+          @for (profile of vault.profiles(); track profile.id) {
+            <button
+              type="button"
+              class="profile-option"
+              [class.active]="profile.id === vault.activeProfileId()"
+              (click)="switchProfile(profile.id)"
+            >
+              <span>{{ profile.name }}</span>
+              <span class="meta">
+                {{ profile.encryptionState === 'enabled' ? 'Locked vault' : 'Open vault' }}
+              </span>
+            </button>
+          }
+        </div>
+
+        <footer class="modal-foot">
+          <button type="button" class="ghost" (click)="cancel()">Done</button>
+        </footer>
+      }
+
+      @if (modal.kind === 'create_profile' || modal.kind === 'rename_profile') {
+        <label class="field">
+          Profile name
+          <input type="text" [(ngModel)]="draftText" (keyup.enter)="submitPrimary()" autocomplete="off" />
+        </label>
+      }
+
+      @if (modal.kind === 'create_collection' || modal.kind === 'rename_collection') {
+        <label class="field">
+          Collection name
+          <input type="text" [(ngModel)]="draftText" (keyup.enter)="submitPrimary()" autocomplete="off" />
+        </label>
+      }
+
+      @if (modal.kind === 'enable_lock' || modal.kind === 'import_profile_passphrase') {
+        <label class="field">
+          Passphrase
+          <input
+            type="password"
+            [(ngModel)]="draftPassphrase"
+            (keyup.enter)="submitPrimary()"
+            autocomplete="current-password"
+          />
+        </label>
+      }
+
+      @if (modal.kind !== 'switch_profile') {
+        <footer class="modal-foot">
+          <button type="button" class="ghost" (click)="cancel()">Cancel</button>
+          <button type="button" class="primary" (click)="submitPrimary()" [disabled]="isPrimaryDisabled(modal)">
+            {{ submitLabel(modal) }}
+          </button>
+        </footer>
+      }
+    </div>
+  </section>
+}

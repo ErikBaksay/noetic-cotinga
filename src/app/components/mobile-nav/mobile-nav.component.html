@@ -1,0 +1,25 @@
+<nav class="mobile-nav">
+  <button
+    type="button"
+    [class.active]="vault.activeMobilePane() === 'collections'"
+    (click)="vault.setActiveMobilePane('collections')"
+  >
+    Library
+  </button>
+
+  <button
+    type="button"
+    [class.active]="vault.activeMobilePane() === 'notes'"
+    (click)="vault.setActiveMobilePane('notes')"
+  >
+    Notes
+  </button>
+
+  <button
+    type="button"
+    [class.active]="vault.activeMobilePane() === 'editor'"
+    (click)="vault.setActiveMobilePane('editor')"
+  >
+    Stage
+  </button>
+</nav>

@@ -1,0 +1,101 @@
+<aside class="panel">
+  <section class="section">
+    <div class="section-head">
+      <h2>Profiles</h2>
+      <button class="ghost" type="button" (click)="createProfile()">New</button>
+    </div>
+
+    <div class="profile-list">
+      @for (profile of vault.profiles(); track profile.id) {
+        <button
+          class="profile-chip"
+          [class.active]="profile.id === vault.activeProfileId()"
+          type="button"
+          (click)="vault.selectProfile(profile.id)"
+        >
+          <span>{{ profile.name }}</span>
+          @if (profile.encryptionState === 'enabled') {
+            <span class="lock">LOCKED</span>
+          }
+        </button>
+      }
+    </div>
+
+    <div class="inline-actions">
+      <button type="button" (click)="renameProfile()" [disabled]="!vault.activeProfile()">Rename</button>
+      <button
+        type="button"
+        class="danger"
+        [disabled]="vault.profiles().length < 2 || !vault.activeProfile()"
+        (click)="deleteProfile(vault.activeProfile()!.id)"
+      >
+        Delete
+      </button>
+    </div>
+
+    <div class="inline-actions">
+      @if (vault.activeProfile()?.encryptionState === 'none') {
+        <button type="button" (click)="enableLock()" [disabled]="!vault.canEditActiveProfile()">Enable Lock</button>
+      }
+      @if (vault.activeProfile()?.encryptionState === 'enabled' && !vault.isActiveProfileLocked()) {
+        <button type="button" (click)="vault.lockActiveProfile()">Lock Now</button>
+      }
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <h2>Collections</h2>
+      <button class="ghost" type="button" (click)="addCollection()" [disabled]="!vault.canEditActiveProfile()">New</button>
+    </div>
+
+    <div class="collection-list">
+      <button
+        type="button"
+        class="collection-item"
+        [class.active]="vault.selectedCollectionId() === null"
+        (click)="vault.selectCollection(null)"
+      >
+        <span>All notes</span>
+        <span class="count">{{ vault.notes().length }}</span>
+      </button>
+
+      @for (collection of vault.collections(); track collection.id) {
+        <div class="collection-row">
+          <button
+            type="button"
+            class="collection-item"
+            [class.active]="collection.id === vault.selectedCollectionId()"
+            (click)="vault.selectCollection(collection.id)"
+          >
+            <span class="collection-name">
+              <span class="lacquer-tab" [style.--collection-color]="collection.color"></span>
+              {{ collection.name }}
+            </span>
+            <span class="count">{{ vault.collectionNoteCount(collection.id) }}</span>
+          </button>
+
+          <div class="collection-tools">
+            <button
+              type="button"
+              title="Rename"
+              [disabled]="!vault.canEditActiveProfile()"
+              (click)="renameCollection(collection.id)"
+            >
+              Rename
+            </button>
+            <button
+              type="button"
+              title="Delete"
+              class="danger"
+              [disabled]="!vault.canEditActiveProfile()"
+              (click)="deleteCollection(collection.id)"
+            >
+              Remove
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+</aside>
